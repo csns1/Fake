@@ -1,0 +1,226 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "ABLE +  Vault API",
+    "version": "1.0"
+  },
+  "components": {
+    "schemas": {
+      "VaultItem": {
+        "type": "object",
+        "required": [
+          "organisationID",
+          "value"
+        ],
+        "properties": {
+          "itemID": {
+            "description": "UUID of the item/ secret. Returned from the vault on item creation.",
+            "type": "string",
+            "format": "uuid"
+          },
+          "organisationID": {
+            "description": "UUID of the organisation / client",
+            "type": "string",
+            "format": "uuid"
+          },
+          "key": {
+            "description": "Application / dictionary key. Used to lookup instead of the ItemID. Can be empty.",
+            "type": "string"
+          },
+          "value": {
+            "description": "The value of the secret stored in vault.",
+            "type": "string"
+          },
+          "ttl": {
+            "description": "Time to live <u>in seconds</u> from secret's creation. If 0 the secret do not expire. To use as mandatory for passwords.",
+            "type": "number",
+            "default": 0
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      }
+    },
+    "responses": {
+      "NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "Internal API Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/vault": {
+      "get": {
+        "description": "Base endpoint used ONLY to ping",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "description": "Create e new Vault Item",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VaultItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The resource was created successfully."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/vault/{organisationID}/{itemID}": {
+      "get": {
+        "description": "Gets specific vault secret within an organisation",
+        "responses": {
+          "200": {
+            "description": "Retrive the vault seecret",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VaultItem"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organisationID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "itemID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/vault/{organisationID}/key/{key}": {
+      "get": {
+        "description": "Gets specific vault secret within an organisation from its key",
+        "responses": {
+          "200": {
+            "description": "Retrive the vault seecret",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VaultItem"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organisationID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
